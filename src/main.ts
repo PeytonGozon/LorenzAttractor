@@ -3,12 +3,17 @@ import { LorenzAttractor } from './lorenz-attractor'
 import './style.css'
 
 class App {
-  scene: THREE.Scene
-  camera: THREE.PerspectiveCamera
-  renderer: THREE.Renderer
-  material: THREE.LineBasicMaterial
+  static MAX_POINTS = 10_000
 
-  lorenzAttractor: LorenzAttractor
+  private scene: THREE.Scene
+  private camera: THREE.PerspectiveCamera
+  private renderer: THREE.Renderer
+
+  private lorenzAttractor: LorenzAttractor
+
+  private line: THREE.Line
+  private geometry: THREE.BufferGeometry
+
 
   constructor() {
     this.scene = new THREE.Scene()
@@ -18,9 +23,18 @@ class App {
     this.setupCamera()
     this.setupRenderer()
 
-    this.material = new THREE.LineBasicMaterial({ color: 0x0000ff })
-
     this.lorenzAttractor = new LorenzAttractor()
+
+    for (let i = 0; i < App.MAX_POINTS; i++) {
+      this.lorenzAttractor.update()
+    }
+
+    this.geometry = new THREE.BufferGeometry().setFromPoints(this.lorenzAttractor.points)
+    const material = new THREE.LineBasicMaterial({ color: 0x0000ff })
+
+    this.line = new THREE.Line(this.geometry, material)
+
+    this.scene.add(this.line)
   }
 
   setupCamera() {
@@ -44,32 +58,7 @@ class App {
 
   animate() {
     requestAnimationFrame(() => this.animate())
-
-    this.lorenzAttractor.update()
-
-    const center = this.getCenterOfMass()
-    this.camera.lookAt(center)
-
-    const geometry = new THREE.BufferGeometry().setFromPoints(this.lorenzAttractor.points)
-
-    const line = new THREE.Line(geometry, this.material)
-
-    this.scene.add(line)
-
     this.renderer.render(this.scene, this.camera)
-
-    geometry.dispose()
-  }
-
-  getCenterOfMass(): THREE.Vector3 {
-    const sumOfPoints = this.lorenzAttractor.points.reduce(
-      (acc, current) => acc.add(current),
-      new THREE.Vector3(0, 0, 0)
-    )
-
-    const center = sumOfPoints.divideScalar(this.lorenzAttractor.points.length)
-
-    return center
   }
 }
 
