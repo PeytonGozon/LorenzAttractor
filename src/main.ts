@@ -1,26 +1,77 @@
 import * as THREE from 'three'
+import { LorenzAttractor } from './lorenz-attractor'
 import './style.css'
 
-const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+class App {
+  scene: THREE.Scene
+  camera: THREE.PerspectiveCamera
+  renderer: THREE.Renderer
+  material: THREE.LineBasicMaterial
 
-const renderer = new THREE.WebGLRenderer()
-renderer.setSize(window.innerWidth, window.innerHeight)
-document.body.appendChild(renderer.domElement)
+  lorenzAttractor: LorenzAttractor
 
-const geometry = new THREE.BoxGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-const cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
+  constructor() {
+    this.scene = new THREE.Scene()
+    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500)
+    this.renderer = new THREE.WebGLRenderer()
 
-camera.position.z = 5
+    this.setupCamera()
+    this.setupRenderer()
 
-function animate() {
-  requestAnimationFrame(animate)
+    this.material = new THREE.LineBasicMaterial({ color: 0x0000ff })
 
-  cube.rotation.x += 0.01
-  cube.rotation.y += 0.01
+    this.lorenzAttractor = new LorenzAttractor()
+  }
 
-  renderer.render(scene, camera)
+  setupCamera() {
+    this.camera.position.set(0, 0, 60)
+    this.camera.lookAt(0, 0, 0)
+  }
+
+  setupRenderer() {
+    this.renderer.setSize(window.innerWidth, window.innerHeight)
+    document.body.appendChild(this.renderer.domElement)
+
+    window.addEventListener('resize', this.onWindowResize)
+  }
+
+  onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight
+    this.camera.updateProjectionMatrix()
+
+    this.renderer.setSize(window.innerWidth, window.innerHeight)
+  }
+
+  animate() {
+    requestAnimationFrame(() => this.animate())
+
+    this.lorenzAttractor.update()
+
+    const center = this.getCenterOfMass()
+    this.camera.lookAt(center)
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(this.lorenzAttractor.points)
+
+    const line = new THREE.Line(geometry, this.material)
+
+    this.scene.add(line)
+
+    this.renderer.render(this.scene, this.camera)
+
+    geometry.dispose()
+  }
+
+  getCenterOfMass(): THREE.Vector3 {
+    const sumOfPoints = this.lorenzAttractor.points.reduce(
+      (acc, current) => acc.add(current),
+      new THREE.Vector3(0, 0, 0)
+    )
+
+    const center = sumOfPoints.divideScalar(this.lorenzAttractor.points.length)
+
+    return center
+  }
 }
-animate()
+
+const lorenzAttractorApp = new App()
+lorenzAttractorApp.animate()
