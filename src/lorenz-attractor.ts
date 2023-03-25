@@ -2,7 +2,7 @@ import { Vector3 } from "three"
 
 export class LorenzAttractor {
   // All the points computed as part of the Lorenz Attractor
-  points: Vector3[]
+  currentPoint: Vector3
 
   // Lorenz-Attractor Hyperparameters
   sigma: number
@@ -15,9 +15,7 @@ export class LorenzAttractor {
   constructor() {
     const [x, y, z] = [10, 0.5, 20]
 
-    const startingPoint = new Vector3(x, y, z)
-
-    this.points = [startingPoint]
+    this.currentPoint = new Vector3(x, y, z)
 
     // Initialize the Lorenz Attractor
     this.sigma = 10
@@ -29,8 +27,7 @@ export class LorenzAttractor {
 
   nextPoint(): Vector3 {
     // Get the current point and unpack its position
-    const currentPoint = this.points[this.points.length - 1]
-    const [x, y, z] = [currentPoint.x, currentPoint.y, currentPoint.z]
+    const [x, y, z] = [this.currentPoint.x, this.currentPoint.y, this.currentPoint.z]
 
     // Calculate how much to move the point by
     const dx = (this.sigma * (y - x)) * this.dt
@@ -40,14 +37,8 @@ export class LorenzAttractor {
     // Create the next point
     const nextPoint = new Vector3(x + dx, y + dy, z + dz)
 
+    this.currentPoint = nextPoint
+
     return nextPoint
-  }
-
-  update(): void {
-    // Get the next point
-    const nextPoint = this.nextPoint()
-
-    // Add the next point to the array of points
-    this.points = [...this.points, nextPoint]
   }
 }
