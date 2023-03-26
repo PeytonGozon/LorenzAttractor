@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { BufferAttribute, Float32BufferAttribute } from 'three'
 import { LorenzAttractor } from './lorenz-attractor'
 import './style.css'
 
@@ -88,7 +87,7 @@ class App {
       if (this.numCurrentPoints < this.max_points) {
         const point = this.lorenzAttractor.nextPoint()
 
-        const positions = this.line.geometry.attributes.position as Float32BufferAttribute
+        const positions = this.line.geometry.attributes.position as THREE.Float32BufferAttribute
         positions.setXYZ(this.numCurrentPoints, point.x, point.y, point.z)
 
         this.numCurrentPoints++
