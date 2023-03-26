@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { LorenzAttractor } from './lorenz-attractor'
+import { LorenzAttractor } from './lorenz-attractor.js'
 import './style.css'
 
 class App {
